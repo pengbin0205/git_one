@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+<div id="wrap">
+<h2></h2>
+    <div id="top_content">
+        <div id="header">
+            <div id="rightheader">
+                <p>
+                    2009/11/20
+                    <br/>
+                </p>
+            </div>
+            <div id="topheader">
+                <h1 id="title">
+                    <a href="#">main</a>
+                </h1>
+            </div>
+            <div id="navigation">
+            </div>
+        </div>
+        <div id="content">
+            <p id="whereami">
+            </p>
+            <h1>
+                欢迎{{ name }}登录
+                <a href="{% url 'ems:del_s' %}">退出</a>
+            </h1>
+            <table class="table">
+                <tr class="table_header">
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>Salary</td>
+                    <td>Age</td>
+                    <td>生日</td>
+                    <td>性别</td>
+                    <td>照片</td>
+                    <td>部门</td>
+                    <td>Operation</td>
+                </tr>
+                {% for emp in page %}
+                    <tr class="row1">
+                        <td>{{ emp.id }}</td>
+                        <td>{{ emp.name }}</td>
+                        <td>{{ emp.salary }}</td>
+                        <td>{{ emp.age }}</td>
+                        <td>{{ emp.birthday}}</td>
+                        <td>{{ emp.gender}}</td>
+                        <td><img src="{% static emp.photo.url %}" alt="无法加载"  height="50px" width="50px"></td>
+                        <td>{{ emp.dept_id }}</td>
+                        <td>
+                            <a href="/ems/del/?id={{ emp.id }}">删除</a>|<a href="/ems/update/?id={{ emp.id }}">修改</a></td>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p>
+                <a href="{% url 'ems:add' %}">添加员工</a>
+            </p>
+        </div>
+    </div>
+    <h4 style="color: #5494F3">
+    {#    上一页#}
+        {% if page.has_previous %}
+    {#        获取上一页页码#}
+        <a href="/ems/index/?number={{ page.previous_page_number }}">上一页</a>
+        {% endif %}
+
+        {% for n in page.paginator.page_range %}
+            {% if page.number == n %}
+            <a class="b" href="/ems/index/?number={{ n }}">{{ n }}</a>
+            {% else %}
+            <a class="a" href="/ems/index/?number={{ n }}">{{ n }}</a>
+            {% endif %}
+        {% endfor %}
+    {#    下一页#}
+        {% if page.has_next %}
+    {#        获取下一页页码#}
+        <a href="/ems/index/?number={{ page.next_page_number }}">下一页</a>
+        {% endif %}
+    </h4>
+    <div id="footer">
+        <div id="footer_bg">
+            ABC@126.com
+        </div>
+    </div>
+</div>
+</body>
+</html>

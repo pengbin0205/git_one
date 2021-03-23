@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script>
+        function checkEmail(t) {
+            // 处理相关的验证  只有通过验证后才为True
+            let flag = true;
+            let email = $("[name='email']").val();
+            let pattern = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
+            if (email == null | email == "") {
+                document.getElementById("email_msg").innerHTML = "邮箱不能为空";
+            } else if (pattern.test(email) == false) {
+                document.getElementById("email_msg").innerHTML = "邮箱格式错误";
+            } else {
+                document.getElementById("email_msg").innerHTML = "";
+                flag = checkemail3(t)
+                {#flag = true;#}
+            }
+            return flag;
+        }
+
+        // 检测手机号
+        function checkPhone(t) {
+            let flag = true;
+            let phone = $("[name='phone']").val();
+            let pattern =  /^1(3[0-9]|4[5,7]|5[0,1,2,3,5,6,7,8,9]|6[2,5,6,7]|7[0,1,7,8]|8[0-9]|9[1,8,9])\d{8}$/;
+            if (phone == null | phone == "") {
+                document.getElementById("phone_msg").innerHTML = "手机号不能为空";
+            } else if (pattern.test(phone) == false) {
+                document.getElementById("phone_msg").innerHTML = "手机号格式错误";
+            } else {
+                document.getElementById("phone_msg").innerHTML = "";
+                {#flag = true;#}
+                flag = checkphone3(t)
+            }
+            return flag;
+
+        }
+
+        function checkPwd() {
+            // 初识标识为false，当通过所有验证后改为true
+            let flag = false;
+            // 获取用户输入的密码
+            let user_pwd = $("[name='user_pwd']").val();
+            // 对用户输入的密码强度进行判断  正则判断
+            let pattern = /^[a-zA-Z][a-zA-Z0-9\_\.\@\!\#\$\%\^\&\*\(\)]{5,16}/;
+
+            // 密码不能为空
+            if (user_pwd == null | user_pwd == "") {
+                document.getElementById("pwd_msg").innerHTML = "密码不能为空";
+                // 正则校验密码强度
+            } else if (pattern.test(user_pwd) == false) {
+                document.getElementById("pwd_msg").innerHTML = "密码强度太低";
+                // 代表校验通过
+            } else {
+                document.getElementById("pwd_msg").innerHTML = "";
+                flag = true;
+            }
+            return flag;
+        }
+
+        function checkemail3(t) {
+            // 声明一个对象
+            let flag = false
+            let xhr = new XMLHttpRequest();
+            // 指定服务器地址与方法
+            let url = "/user/checkEmail2/";
+            xhr.open('post', url, true);
+            // 发送请求 post请求需要在请求头中指定csrf
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("csrfmiddlewaretoken={{ csrf_token }}&email=" + t.value);
+            // 接收服务器返回的响应
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    let responseText = xhr.responseText;
+                    // 更新页面
+                    let span = document.getElementById("text1");
+                    span.innerHTML = responseText;
+                    if (span.innerHTML === true){
+                        flag = false;
+                        return flag
+                    }
+                    else {
+                        flag = true;
+                        return flag
+                    }
+                }
+            }
+        }
+
+        function checkphone3(t){
+            let flag = false;
+            let xhr = new XMLHttpRequest();
+            let url = "/user/checkPhone2/";
+            xhr.open("post",url,true);
+            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+            xhr.send("csrfmiddlewaretoken={{ csrf_token }}&phone=" + t.value);
+            xhr.onreadystatechange = function (){
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    let responseText = xhr.responseText;
+                    let span = document.getElementById("text2");
+                    span.innerHTML = responseText;
+                    if(span.innerHTML === true){
+                        flag = false;
+                        return flag
+
+                    }
+                    else {
+                        flag = true;
+                        return flag
+                    }
+                }
+            }
+        }
+
+        // 向发送邮件
+        function send_main() {
+            // 向后台发送请求，向邮箱内发送邮件
+            let flag = checkEmail();
+            let email = $("[name='email']").val();
+            // 如果flag为true，则代表邮箱格式合法，才发送邮件
+            if (flag === true) {
+                $.ajax({
+                    url: "{% url 'user:send_email' %}",
+                    type: 'get',
+                    data: "email=" + email,
+                    success: function (msg) {
+                        console.log(msg);
+                    }
+                })
+            }
+
+        }
+
+        // 发起注册请求
+        function register() {
+            let flag1 = checkPwd();
+            let flag2 = checkEmail();
+            let flag3 = checkPhone();
+            if (flag1 === true && flag2 === true && flag3 === true) {
+                // 提交当前页面的表单
+                document.forms[0].submit();
+            }
+        }
+
+        function fn1() {
+        let img = document.getElementsByTagName('img')[0];
+        img.src = "/user/captcha/" + "?" + new Date().getTime();
+        //区别每个验证码
+    }
+
+    </script>
+</head>
+<body>
+<div id="wrap">
+    <div id="top_content">
+        <div id="header">
+            <div id="rightheader">
+                <p>2009/11/20<br/></p>
+            </div>
+            <div id="topheader">
+                <h1 id="title"><a href="#">main</a></h1>
+            </div>
+            <div id="navigation"></div>
+        </div>
+        <div id="content">
+            <p id="whereami"></p>
+            <h1>注册</h1>
+            <form action="{% url 'user:user_register' %}" method="post">
+                {% csrf_token %}
+                <table cellpadding="0" cellspacing="0" border="0"
+                       class="form_table">
+                    <tr>
+                        <td valign="middle" align="right">邮箱:</td>
+                        <td valign="middle" align="left">
+                            <input type="text" class="inputgri" name="email" onblur="checkEmail(this)"/>
+                            <span id="text1" style="color: red"></span>
+                            <br>
+                            <input type="button" value="获取邮箱验证码" onclick="send_main()">
+                            <span id="email_msg" style="color: #CE090E"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="middle" align="right">手机号:</td>
+                        <td valign="middle" align="left">
+                            <input type="text" class="inputgri" name="phone" onblur="checkPhone(this)"/>
+                            <span id="text2" style="color:red"></span>
+                            <span id="phone_msg" style="color: #CE090E"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="middle" align="right">密码:</td>
+                        <td valign="middle" align="left">
+                            <input type="password" class="inputgri" name="user_pwd" onblur="checkPwd()"/>
+                            <span id="pwd_msg" style="color: #CE090E"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="middle" align="right">
+                            性别:
+                        </td>
+                        <td valign="middle" align="left">
+                            男
+                            <input type="radio" class="inputgri" name="sex" value="m" checked="checked"/>
+                            女
+                            <input type="radio" class="inputgri" name="sex" value="f"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td valign="middle" align="right">邮箱验证码:</td>
+                        <td valign="middle" align="left">
+                            <input type="text" class="inputgri" name="email_code"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td valign="middle" align="right">
+                            验证码:
+                        </td>
+                        <td valign="middle" align="left">
+                            <input type="text" class="inputgri" name="number"/>
+                        </td>
+                        <td>
+                            <img id="num" src="/user/captcha/" alt="无法加载" width="100"/>
+                            <a href="javascript:;" onclick=fn1()>换一张</a>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    <input type="button" class="button" value="注册" onclick="register()"/>
+                </p>
+            </form>
+        </div>
+    </div>
+    <div id="footer">
+        <div id="footer_bg">
+            ABC@126.com
+        </div>
+    </div>
+</div>
+</body>
+</html>
